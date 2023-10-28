@@ -20,29 +20,31 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
+  
   .formWrapper {
-    background-color: white;
+    background-color: rgba(89, 167, 240, 0.653);
     padding: 20px 60px;
     border-radius: 10px;
+    border-radius: 100px;
     display: flex;
     flex-direction: column;
     gap: 10px;
     align-items: center;
     img{
       height: 100px;
-      width: 200px;
+      width: 100px;
+      border-radius: 50px;
     }
 
     .logo {
-      color: #5d5b8d;
+      color: #0a0a1f5f;
       font-weight: bold;
       font-size: 24px;
 
     }
 
     .title {
-      color: #5d5b8d;
+      color: #ecf5f6;
       font-size: 12px;
     }
 
@@ -74,7 +76,7 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        color: #8da4f1;
+        color: #f3f4f9;
         font-size: 12px;
         cursor: pointer;
 
