@@ -10,8 +10,8 @@ const CreateConversation = ({ data }) => {
    const { dispatch } = useContext(ChatContext);
   const [showContacts, setShowContacts] = useState(false)
   const {currentUser} = useContext(AuthContext);
-  const [User, setUser] = useState(null);
-  const [username, setUsername] = useState(null)
+  // const [User, setUser] = useState(null);
+  // const [username, setUsername] = useState(null)
   useEffect(() => {
     const fetchContacts = async () => {
       const q = query(
