@@ -1,6 +1,5 @@
 import React, { useContext, useState } from "react";
 import Img from "../img/img.png";
-import Attach from "../img/attach.png";
 import { AuthContext } from "../context/AuthContext";
 import { ChatContext } from "../context/ChatContext";
 import {
@@ -22,58 +21,60 @@ const Input = () => {
   const { data } = useContext(ChatContext);
 
   const handleSend = async () => {
+    let downloadURL = null;
+
     if (img) {
       const storageRef = ref(storage, uuid());
 
       const uploadTask = uploadBytesResumable(storageRef, img);
 
-      uploadTask.on(
-        (error) => {
-          //TODO:Handle Error
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-            await updateDoc(doc(db, "chats", data.chatId), {
-              messages: arrayUnion({
-                id: uuid(),
-                text,
-                senderId: currentUser.uid,
-                date: Timestamp.now(),
-                img: downloadURL,
-              }),
-            });
-          });
-        }
-      );
-    } else {
-      await updateDoc(doc(db, "chats", data.chatId), {
-        messages: arrayUnion({
-          id: uuid(),
-          text,
-          senderId: currentUser.uid,
-          date: Timestamp.now(),
-        }),
-      });
-      alert("Message sent")
+      // Wait for the upload to complete and get the download URL
+      try {
+        const snapshot = await new Promise((resolve, reject) => {
+          uploadTask.on(
+            'state_changed', 
+            (snapshot) => {
+              // Handle state changes if needed (e.g., progress updates)
+            },
+            (error) => reject(error),
+            () => resolve(uploadTask.snapshot)
+          );
+        });
+        downloadURL = await getDownloadURL(snapshot.ref);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        return;
+      }
     }
 
-    await updateDoc(doc(db, "userChats", currentUser.uid), {
-      [data.chatId + ".lastMessage"]: {
+    // Update the chat document with the new message
+    await updateDoc(doc(db, "chats", data.chatId), {
+      messages: arrayUnion({
+        id: uuid(),
         text,
-      },
-      [data.chatId + ".date"]: serverTimestamp(),
+        senderId: currentUser.uid,
+        date: Timestamp.now(),
+        img: downloadURL, // Only include the image URL if there is one
+      }),
     });
 
-    await updateDoc(doc(db, "userChats", data.user.uid), {
-      [data.chatId + ".lastMessage"]: {
-        text,
-      },
-      [data.chatId + ".date"]: serverTimestamp(),
-    });
+    // Update the last message info for both users
+    const updateUserChats = [
+      updateDoc(doc(db, "userChats", currentUser.uid), {
+        [`${data.chatId}.lastMessage`]: { text },
+        [`${data.chatId}.date`]: serverTimestamp(),
+      }),
+      updateDoc(doc(db, "userChats", data.user.uid), {
+        [`${data.chatId}.lastMessage`]: { text },
+        [`${data.chatId}.date`]: serverTimestamp(),
+      }),
+    ];
+    await Promise.all(updateUserChats);
 
     setText("");
     setImg(null);
   };
+
   return (
     <div className="input">
       <input
@@ -83,7 +84,7 @@ const Input = () => {
         value={text}
       />
       <div className="send">
-        <img src={Attach} alt="" />
+       
         <input
           type="file"
           style={{ display: "none" }}
