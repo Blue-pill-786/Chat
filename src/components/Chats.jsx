@@ -5,44 +5,51 @@ import { ChatContext } from "../context/ChatContext";
 import { db } from "../firebase";
 
 const Chats = () => {
-  const [chats, setChats] = useState([]);
+  const [chats, setChats] = useState({});
 
   const { currentUser } = useContext(AuthContext);
   const { dispatch } = useContext(ChatContext);
 
   useEffect(() => {
-    const getChats = () => {
-      const unsub = onSnapshot(doc(db, "userChats", currentUser.uid), (doc) => {
-        setChats(doc.data() || {}); // Ensure chats is an object or initialize it as an empty object
-      });
+    if (!currentUser?.uid) return;
 
-      return () => {
-        unsub();
-      };
-    };
+    const unsub = onSnapshot(
+      doc(db, "userChats", currentUser.uid),
+      (snapshot) => {
+        setChats(snapshot.data() || {});
+      }
+    );
 
-    currentUser.uid && getChats();
-  }, [currentUser.uid]);
+    return () => unsub();
+  }, [currentUser?.uid]);
 
-  const handleSelect = (u) => {
-    dispatch({ type: "CHANGE_USER", payload: u });
+  const handleSelect = (userInfo) => {
+    dispatch({ type: "CHANGE_USER", payload: userInfo });
   };
 
   return (
     <div className="chats">
-      {Object.entries(chats)?.sort((a, b) => b[1].date - a[1].date).map((chat) => (
-        <div
-          className="userChat"
-          key={chat[0]}
-          onClick={() => handleSelect(chat[1]?.userInfo)}
-        >
-          <img src={chat[1]?.userInfo?.photoURL} alt="" />
-          <div className="userChatInfo">
-            <span>{chat[1]?.userInfo?.displayName}</span>
-            <p>{chat[1]?.lastMessage?.text}</p>
+      {Object.entries(chats)
+        .sort(
+          (a, b) =>
+            b[1]?.date?.toMillis() - a[1]?.date?.toMillis()
+        )
+        .map(([chatId, chat]) => (
+          <div
+            className="userChat"
+            key={chatId}
+            onClick={() => handleSelect(chat.userInfo)}
+          >
+            <img
+              src={chat.userInfo?.photoURL || "/avatar.png"}
+              alt="user avatar"
+            />
+            <div className="userChatInfo">
+              <span>{chat.userInfo?.displayName}</span>
+              <p>{chat.lastMessage?.text}</p>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
     </div>
   );
 };

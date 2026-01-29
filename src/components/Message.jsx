@@ -7,23 +7,41 @@ const Message = ({ message }) => {
   const { currentUser } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
 
-  const ref = useRef();
+  const ref = useRef(null);
+
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior: "smooth" });
   }, [message]);
 
-  // Format the timestamp
-  const formattedDate = message.date ? format(message.date.toDate(), "Pp") : "Unknown date";
+  const formattedDate =
+    message?.date?.toDate
+      ? format(message.date.toDate(), "Pp")
+      : "";
+
+  const isOwner = message.senderId === currentUser.uid;
+
+  const avatar = isOwner
+    ? currentUser.photoURL
+    : data.user?.photoURL;
 
   return (
-    <div ref={ref} className={`message ${message.senderId === currentUser.uid && "owner"}`}>
+    <div
+      ref={ref}
+      className={`message ${isOwner ? "owner" : ""}`}
+    >
       <div className="messageInfo">
-        <img src={message.senderId === currentUser.uid ? currentUser.photoURL : data.user.photoURL} alt="" />
-        <span className="formattedDate">{formattedDate}</span>
+        <img
+          src={avatar || "/avatar.png"}
+          alt="user avatar"
+        />
+        <span className="formattedDate">
+          {formattedDate}
+        </span>
       </div>
+
       <div className="messageContent">
-        <p>{message.text}</p>
-        {message.img && <img src={message.img} alt="" />}
+        {message.text && <p>{message.text}</p>}
+        {message.img && <img src={message.img} alt="sent media" />}
       </div>
     </div>
   );

@@ -7,7 +7,6 @@ import {
   query,
   serverTimestamp,
   setDoc,
-  updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "../firebase";
@@ -19,10 +18,11 @@ const Search = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   const { currentUser } = useContext(AuthContext);
 
   const handleSearch = async () => {
-    if (!username.trim()) return;
+    if (!username.trim() || !currentUser?.uid) return;
 
     setLoading(true);
     setError("");
@@ -34,20 +34,23 @@ const Search = () => {
         where("displayName", "==", username.trim())
       );
 
-      const querySnapshot = await getDocs(q);
+      const snapshot = await getDocs(q);
 
-      if (querySnapshot.empty) {
+      if (snapshot.empty) {
         setError("No user found");
         return;
       }
 
-      querySnapshot.forEach((docSnap) => {
-        if (docSnap.id !== currentUser.uid) {
-          setUser({ ...docSnap.data(), uid: docSnap.id });
-        } else {
-          setError("You can’t chat with yourself 🙂");
-        }
-      });
+      const match = snapshot.docs.find(
+        (docSnap) => docSnap.id !== currentUser.uid
+      );
+
+      if (!match) {
+        setError("You can’t chat with yourself 🙂");
+        return;
+      }
+
+      setUser({ ...match.data(), uid: match.id });
     } catch (err) {
       setError("Something went wrong. Try again.");
     } finally {
@@ -55,12 +58,8 @@ const Search = () => {
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") handleSearch();
-  };
-
   const handleSelect = async () => {
-    if (!user) return;
+    if (!user || !currentUser) return;
 
     const combinedId =
       currentUser.uid > user.uid
@@ -75,26 +74,33 @@ const Search = () => {
         await setDoc(chatRef, { messages: [] });
 
         await Promise.all([
-          updateDoc(doc(db, "userChats", currentUser.uid), {
-            [`${combinedId}.userInfo`]: {
-              uid: user.uid,
-              displayName: user.displayName,
-              photoURL: user.photoURL,
+          setDoc(
+            doc(db, "userChats", currentUser.uid),
+            {
+              [`${combinedId}.userInfo`]: {
+                uid: user.uid,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+              },
+              [`${combinedId}.date`]: serverTimestamp(),
             },
-            [`${combinedId}.date`]: serverTimestamp(),
-          }),
-          updateDoc(doc(db, "userChats", user.uid), {
-            [`${combinedId}.userInfo`]: {
-              uid: currentUser.uid,
-              displayName: currentUser.displayName,
-              photoURL: currentUser.photoURL,
+            { merge: true }
+          ),
+          setDoc(
+            doc(db, "userChats", user.uid),
+            {
+              [`${combinedId}.userInfo`]: {
+                uid: currentUser.uid,
+                displayName: currentUser.displayName,
+                photoURL: currentUser.photoURL,
+              },
+              [`${combinedId}.date`]: serverTimestamp(),
             },
-            [`${combinedId}.date`]: serverTimestamp(),
-          }),
+            { merge: true }
+          ),
         ]);
       }
     } catch (err) {
-      console.error(err);
       setError("Failed to start chat");
     }
 
@@ -110,12 +116,11 @@ const Search = () => {
           placeholder="Search users…"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         />
       </div>
 
       {loading && <span className="searchHint">Searching…</span>}
-
       {error && <span className="searchError">{error}</span>}
 
       <AnimatePresence>
@@ -128,7 +133,10 @@ const Search = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-            <img src={user.photoURL} alt={user.displayName} />
+            <img
+              src={user.photoURL || "/avatar.png"}
+              alt={user.displayName}
+            />
             <div className="userChatInfo">
               <span>{user.displayName}</span>
               <p>Click to start chat</p>
