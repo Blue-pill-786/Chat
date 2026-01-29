@@ -6,7 +6,6 @@ import { db } from "../firebase";
 
 const Chats = () => {
   const [chats, setChats] = useState({});
-
   const { currentUser } = useContext(AuthContext);
   const { dispatch } = useContext(ChatContext);
 
@@ -24,21 +23,28 @@ const Chats = () => {
   }, [currentUser?.uid]);
 
   const handleSelect = (userInfo) => {
-  dispatch({
-    type: "CHANGE_USER",
-    payload: {
-      user: userInfo,
-      currentUid: currentUser.uid,
-    },
-  });
-};
+    if (!userInfo) return;
+
+    dispatch({
+      type: "CHANGE_USER",
+      payload: {
+        user: userInfo,
+        currentUid: currentUser.uid,
+      },
+    });
+  };
 
   return (
     <div className="chats">
       {Object.entries(chats)
+        .filter(
+          ([_, chat]) =>
+            chat && chat.userInfo && chat.userInfo.uid
+        )
         .sort(
           (a, b) =>
-            b[1]?.date?.toMillis() - a[1]?.date?.toMillis()
+            b[1]?.date?.toMillis?.() -
+            a[1]?.date?.toMillis?.()
         )
         .map(([chatId, chat]) => (
           <div
@@ -47,12 +53,12 @@ const Chats = () => {
             onClick={() => handleSelect(chat.userInfo)}
           >
             <img
-              src={chat.userInfo?.photoURL || "/avatar.png"}
-              alt="user avatar"
+              src={chat.userInfo.photoURL || "/avatar.png"}
+              alt={chat.userInfo.displayName}
             />
             <div className="userChatInfo">
-              <span>{chat.userInfo?.displayName}</span>
-              <p>{chat.lastMessage?.text}</p>
+              <span>{chat.userInfo.displayName}</span>
+              <p>{chat.lastMessage?.text || ""}</p>
             </div>
           </div>
         ))}
