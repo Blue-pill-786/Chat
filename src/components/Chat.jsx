@@ -1,3 +1,11 @@
+import React, { useContext } from "react";
+import { ChatContext } from "../context/ChatContext";
+import Messages from "./Messages";
+import Input from "./Input";
+import Cam from "../img/cam.png";
+import Add from "../img/add.png";
+import More from "../img/more.png";
+
 const Chat = () => {
   const { data } = useContext(ChatContext);
 
@@ -27,3 +35,5 @@ const Chat = () => {
     </div>
   );
 };
+
+export default Chat;
