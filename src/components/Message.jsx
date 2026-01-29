@@ -6,42 +6,35 @@ import { format } from "date-fns";
 const Message = ({ message }) => {
   const { currentUser } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
-
   const ref = useRef(null);
+
+  const isOwner = message.senderId === currentUser.uid;
 
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior: "smooth" });
   }, [message]);
 
-  const formattedDate =
-    message?.date?.toDate
-      ? format(message.date.toDate(), "Pp")
-      : "";
-
-  const isOwner = message.senderId === currentUser.uid;
-
   const avatar = isOwner
     ? currentUser.photoURL
     : data.user?.photoURL;
 
+  const time =
+    message?.date?.toDate
+      ? format(message.date.toDate(), "p")
+      : "";
+
   return (
-    <div
-      ref={ref}
-      className={`message ${isOwner ? "owner" : ""}`}
-    >
-      <div className="messageInfo">
-        <img
-          src={avatar || "/avatar.png"}
-          alt="user avatar"
-        />
-        <span className="formattedDate">
-          {formattedDate}
-        </span>
-      </div>
+    <div ref={ref} className={`message ${isOwner ? "owner" : ""}`}>
+      {!isOwner && (
+        <div className="messageInfo">
+          <img src={avatar || "/avatar.png"} alt="avatar" />
+        </div>
+      )}
 
       <div className="messageContent">
         {message.text && <p>{message.text}</p>}
         {message.img && <img src={message.img} alt="sent media" />}
+        <span className="timestamp">{time}</span>
       </div>
     </div>
   );

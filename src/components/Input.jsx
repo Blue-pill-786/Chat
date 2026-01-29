@@ -7,7 +7,6 @@ import {
   doc,
   serverTimestamp,
   setDoc,
-  updateDoc,
   Timestamp,
 } from "firebase/firestore";
 import { db, storage } from "../firebase";
@@ -23,7 +22,7 @@ const Input = () => {
   const { data } = useContext(ChatContext);
 
   const handleSend = async () => {
-    if (!data.chatId || !currentUser?.uid) return;
+    if (!data.chatId || !data.user?.uid || !currentUser?.uid) return;
     if (!text.trim() && !img) return;
     if (sending) return;
 
@@ -32,7 +31,9 @@ const Input = () => {
     try {
       let downloadURL = null;
 
-      // Upload image if present
+      /* =========================
+         UPLOAD IMAGE (IF ANY)
+      ========================= */
       if (img) {
         const storageRef = ref(storage, uuid());
         const uploadTask = uploadBytesResumable(storageRef, img);
@@ -46,6 +47,9 @@ const Input = () => {
         downloadURL = await getDownloadURL(snapshot.ref);
       }
 
+      /* =========================
+         MESSAGE OBJECT
+      ========================= */
       const message = {
         id: uuid(),
         text: text.trim(),
@@ -54,7 +58,9 @@ const Input = () => {
         ...(downloadURL && { img: downloadURL }),
       };
 
-      // 🔒 SAFE WRITE (no chats/null, no missing doc crash)
+      /* =========================
+         WRITE MESSAGE (SAFE)
+      ========================= */
       await setDoc(
         doc(db, "chats", data.chatId),
         { messages: arrayUnion(message) },
@@ -63,15 +69,26 @@ const Input = () => {
 
       const lastMessageText = text.trim() || "📷 Image";
 
+      /* =========================
+         UPDATE USER CHATS (SAFE)
+      ========================= */
       await Promise.all([
-        updateDoc(doc(db, "userChats", currentUser.uid), {
-          [`${data.chatId}.lastMessage`]: { text: lastMessageText },
-          [`${data.chatId}.date`]: serverTimestamp(),
-        }),
-        updateDoc(doc(db, "userChats", data.user.uid), {
-          [`${data.chatId}.lastMessage`]: { text: lastMessageText },
-          [`${data.chatId}.date`]: serverTimestamp(),
-        }),
+        setDoc(
+          doc(db, "userChats", currentUser.uid),
+          {
+            [`${data.chatId}.lastMessage`]: { text: lastMessageText },
+            [`${data.chatId}.date`]: serverTimestamp(),
+          },
+          { merge: true }
+        ),
+        setDoc(
+          doc(db, "userChats", data.user.uid),
+          {
+            [`${data.chatId}.lastMessage`]: { text: lastMessageText },
+            [`${data.chatId}.date`]: serverTimestamp(),
+          },
+          { merge: true }
+        ),
       ]);
 
       setText("");
@@ -87,10 +104,11 @@ const Input = () => {
     <div className="input">
       <input
         type="text"
-        placeholder="Type something..."
+        placeholder="Type something…"
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSend()}
+        disabled={sending}
       />
 
       <div className="send">

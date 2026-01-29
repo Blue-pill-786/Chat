@@ -9,29 +9,19 @@ const Messages = () => {
   const { data } = useContext(ChatContext);
 
   useEffect(() => {
-    if (!data.chatId) {
-      setMessages([]);
-      return;
-    }
+    if (!data.chatId) return;
 
-    const unsub = onSnapshot(
-      doc(db, "chats", data.chatId),
-      (snapshot) => {
-        if (snapshot.exists()) {
-          setMessages(snapshot.data().messages || []);
-        } else {
-          setMessages([]);
-        }
-      }
-    );
+    const unsub = onSnapshot(doc(db, "chats", data.chatId), (docSnap) => {
+      docSnap.exists() && setMessages(docSnap.data().messages || []);
+    });
 
     return () => unsub();
   }, [data.chatId]);
 
   return (
     <div className="messages">
-      {messages.map((message) => (
-        <Message message={message} key={message.id} />
+      {messages.map((m) => (
+        <Message message={m} key={m.id} />
       ))}
     </div>
   );
