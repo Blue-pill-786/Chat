@@ -1,7 +1,7 @@
 const Chat = () => {
   const { data } = useContext(ChatContext);
 
-  if (!data.user) {
+  if (!data.chatId) {
     return (
       <div className="chat empty">
         <span className="noChatText">
@@ -14,13 +14,14 @@ const Chat = () => {
   return (
     <div className="chat">
       <div className="chatInfo">
-        <span>{data.user.displayName}</span>
+        <span>{data.user?.displayName}</span>
         <div className="chatIcons">
           <img src={Cam} alt="Video call" />
           <img src={Add} alt="Add user" />
           <img src={More} alt="More options" />
         </div>
       </div>
+
       <Messages />
       <Input />
     </div>

@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
+import { ChatContext } from "../context/ChatContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Search = () => {
@@ -20,6 +21,7 @@ const Search = () => {
   const [error, setError] = useState("");
 
   const { currentUser } = useContext(AuthContext);
+  const { dispatch } = useContext(ChatContext);
 
   const handleSearch = async () => {
     if (!username.trim() || !currentUser?.uid) return;
@@ -59,7 +61,7 @@ const Search = () => {
   };
 
   const handleSelect = async () => {
-    if (!user || !currentUser) return;
+    if (!user || !currentUser?.uid) return;
 
     const combinedId =
       currentUser.uid > user.uid
@@ -100,6 +102,15 @@ const Search = () => {
           ),
         ]);
       }
+
+      // ✅ OPEN THE CHAT IMMEDIATELY
+      dispatch({
+        type: "CHANGE_USER",
+        payload: {
+          user,
+          currentUid: currentUser.uid,
+        },
+      });
     } catch (err) {
       setError("Failed to start chat");
     }
