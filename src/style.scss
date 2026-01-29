@@ -34,21 +34,6 @@
   --blur: saturate(180%) blur(20px);
 }
 
-[data-theme="dark"] {
-  --bg-app: #000000;
-  --bg-surface: #1c1c1e;
-  --bg-chat: #000000;
-  --bg-input: #2c2c2e;
-
-  --text-primary: #f9fafb;
-  --text-muted: #9ca3af;
-
-  --accent: #0a84ff;
-  --accent-soft: rgba(10, 132, 255, 0.25);
-
-  --border-soft: rgba(255, 255, 255, 0.08);
-}
-
 /* =====================================================
    APP SHELL
 ===================================================== */
@@ -99,12 +84,12 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        font-weight: 600;
 
         img {
           width: 34px;
           height: 34px;
           border-radius: 50%;
+          object-fit: cover;
         }
       }
 
@@ -134,7 +119,6 @@
         gap: 12px;
         align-items: center;
         cursor: pointer;
-        transition: background 0.15s ease;
 
         &:hover {
           background: var(--accent-soft);
@@ -144,13 +128,13 @@
           width: 44px;
           height: 44px;
           border-radius: 50%;
+          object-fit: cover;
         }
 
         .userChatInfo {
           span {
             font-size: 15px;
             font-weight: 500;
-            color: var(--text-primary);
           }
 
           p {
@@ -180,79 +164,100 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        font-weight: 500;
       }
 
       /* =========================
-         MESSAGES (iOS STYLE)
+         MESSAGES (FIXED)
       ========================= */
 
       .messages {
         flex: 1;
+        min-height: 0; /* 🔑 scroll fix */
         padding: 16px;
         overflow-y: auto;
+        overflow-x: hidden;
         display: flex;
         flex-direction: column;
         gap: 10px;
+        -webkit-overflow-scrolling: touch;
+      }
 
-        .message {
-          display: flex;
-          align-items: flex-end;
-          animation: iosPop 0.18s ease-out both;
+      .message {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+        animation: iosPop 0.18s ease-out both;
 
-          &.owner {
-            justify-content: flex-end;
-          }
-
-          .messageContent {
-            max-width: 70%;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-
-            p {
-              padding: 10px 14px;
-              font-size: 14.5px;
-              line-height: 1.4;
-              word-break: break-word;
-              background: #e5e7eb;
-              color: #111827;
-              border-radius: 18px;
-              box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-            }
-
-            img {
-              max-width: 260px;
-              width: 100%;
-              border-radius: 16px;
-              object-fit: cover;
-              cursor: pointer;
-              box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
-              transition: transform 0.2s ease, box-shadow 0.2s ease;
-            }
-
-            img:hover {
-              transform: scale(1.02);
-              box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
-            }
-          }
-
-          &.owner .messageContent {
-            p {
-              background: linear-gradient(135deg, #0a84ff, #007aff);
-              color: #ffffff;
-              border-bottom-right-radius: 6px;
-            }
-
-            img {
-              align-self: flex-end;
-            }
-          }
-
-          &:not(.owner) .messageContent p {
-            border-bottom-left-radius: 6px;
-          }
+        &.owner {
+          justify-content: flex-end;
         }
+      }
+
+      /* Avatar + time */
+      .messageInfo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .messageInfo img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+
+      .formattedDate {
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+
+      /* Message bubble container */
+      .messageContent {
+        max-width: 70%;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      /* Text bubble */
+      .messageContent p {
+        padding: 10px 14px;
+        font-size: 14.5px;
+        line-height: 1.4;
+        background: #e5e7eb;
+        color: #111827;
+        border-radius: 18px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+        word-break: break-word;
+      }
+
+      /* Sent */
+      .message.owner .messageContent p {
+        background: linear-gradient(135deg, #0a84ff, #007aff);
+        color: #fff;
+        border-bottom-right-radius: 6px;
+      }
+
+      /* Received */
+      .message:not(.owner) .messageContent p {
+        border-bottom-left-radius: 6px;
+      }
+
+      /* Chat images ONLY */
+      .messageContent > img {
+        max-width: 260px;
+        width: 100%;
+        border-radius: 16px;
+        object-fit: cover;
+        cursor: pointer;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+      }
+
+      .message.owner .messageContent > img {
+        align-self: flex-end;
       }
 
       /* =========================
@@ -274,21 +279,15 @@
           border: none;
           background: var(--bg-input);
           font-size: 14px;
-
-          &:focus {
-            outline: none;
-          }
         }
 
         button {
           padding: 10px 18px;
           border-radius: 18px;
           background: var(--accent);
-          color: #ffffff;
+          color: #fff;
           border: none;
-          font-weight: 500;
           cursor: pointer;
-          transition: transform 0.15s ease;
 
           &:active {
             transform: scale(0.96);
@@ -304,16 +303,16 @@
 ===================================================== */
 
 @include mobile {
-  .chat .messages .messageContent {
+  .messageContent {
     max-width: 85%;
+  }
 
-    img {
-      max-width: 220px;
-    }
+  .messageContent > img {
+    max-width: 220px;
+  }
 
-    p {
-      font-size: 14px;
-    }
+  .messageContent p {
+    font-size: 14px;
   }
 }
 
