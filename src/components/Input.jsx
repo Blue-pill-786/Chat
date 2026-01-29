@@ -52,3 +52,5 @@ const handleSend = async () => {
     console.error("Message send failed:", err);
   }
 };
+
+export default Input;
