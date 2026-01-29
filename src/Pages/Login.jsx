@@ -1,4 +1,4 @@
-import React from "react";
+
 import { useValue } from "../context/itemContext";
 import { Link } from "react-router-dom";
 import bleeding  from '../img/bleeding.jpg'

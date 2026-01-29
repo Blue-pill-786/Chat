@@ -4,9 +4,9 @@ import './style.scss';
 import CustomItemContext from './context/itemContext';
 import { AuthContext } from './context/AuthContext';
 
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Home from './pages/Home';
+import Login from './Pages/Login';
+import Register from './Pages/Register';
+import Home from './Pages/Home';
 
 function App() {
   const { currentUser } = useContext(AuthContext);
