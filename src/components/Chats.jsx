@@ -14,12 +14,8 @@ const Chats = () => {
 
     const unsub = onSnapshot(
       doc(db, "userChats", currentUser.uid),
-      (snapshot) => {
-        if (snapshot.exists()) {
-          setChats(snapshot.data());
-        } else {
-          setChats({});
-        }
+      (snap) => {
+        setChats(snap.exists() ? snap.data() : {});
       }
     );
 
@@ -38,34 +34,42 @@ const Chats = () => {
     });
   };
 
-  const validChats = Object.entries(chats).sort(
+  const chatEntries = Object.entries(chats).sort(
     (a, b) =>
       (b[1]?.date?.toMillis?.() || 0) -
       (a[1]?.date?.toMillis?.() || 0)
   );
-    console.log("Valid chats: ",validChats);
+  console.log("Chat Entries:", chatEntries);
   return (
     <div className="chats">
-      {validChats.length === 0 && (
+      {chatEntries.length === 0 && (
         <div className="noChats">No conversations yet</div>
       )}
 
-      {validChats.map((chat) => (
-        <div
-          className="userChat"
-          key={chat.chatId}
-          onClick={() => handleSelect(chat.userInfo)}
-        >
-          <img
-            src={chat.userInfo.photoURL || "/avatar.png"}
-            alt={chat.userInfo.displayName}
-          />
-          <div className="userChatInfo">
-            <span>{chat.userInfo.displayName}</span>
-            <p>{chat.lastMessage?.text || "No messages yet"}</p>
+      {chatEntries.map(([chatId, chat]) => {
+        const userInfo = chat?.userInfo;
+
+        // 🔒 HARD GUARD — prevents crash
+        if (!userInfo?.uid) return null;
+
+        return (
+          <div
+            className="userChat"
+            key={chatId}
+            onClick={() => handleSelect(userInfo)}
+          >
+            <img
+              src={userInfo.photoURL || "/avatar.png"}
+              alt={userInfo.displayName || "User"}
+            />
+
+            <div className="userChatInfo">
+              <span>{userInfo.displayName || "Unknown"}</span>
+              <p>{chat.lastMessage?.text || "No messages yet"}</p>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
