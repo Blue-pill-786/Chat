@@ -1,18 +1,30 @@
 import React, { useContext, useEffect, useState } from "react";
-import Message from "./Message";
-import { ChatContext } from "../context/ChatContext";
 import { doc, onSnapshot } from "firebase/firestore";
+import { ChatContext } from "../context/ChatContext";
 import { db } from "../firebase";
+import Message from "./Message";
 
 const Messages = () => {
-  const [messages, setMessages] = useState([]);
   const { data } = useContext(ChatContext);
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    if (!data.chatId) return;
+    // 🔑 Reset when no chat is selected
+    if (!data.chatId) {
+      setMessages([]);
+      return;
+    }
 
-    const unsub = onSnapshot(doc(db, "chats", data.chatId), (docSnap) => {
-      docSnap.exists() && setMessages(docSnap.data().messages || []);
+    const chatRef = doc(db, "chats", data.chatId);
+
+    const unsub = onSnapshot(chatRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const chatData = docSnap.data();
+        setMessages(chatData.messages || []);
+      } else {
+        // chat not created yet
+        setMessages([]);
+      }
     });
 
     return () => unsub();
@@ -20,8 +32,14 @@ const Messages = () => {
 
   return (
     <div className="messages">
+      {messages.length === 0 && (
+        <div className="noMessages">
+          No messages yet. Say hello 👋
+        </div>
+      )}
+
       {messages.map((m) => (
-        <Message message={m} key={m.id} />
+        <Message key={m.id} message={m} />
       ))}
     </div>
   );
