@@ -12,24 +12,21 @@ const Chats = () => {
   useEffect(() => {
     if (!currentUser?.uid) return;
 
-    useEffect(() => {
-  if (!currentUser?.uid) return;
+    const unsub = onSnapshot(
+      doc(db, "userChats", currentUser.uid),
+      (snapshot) => {
+        console.log("🔥 userChats snapshot:", {
+          exists: snapshot.exists(),
+          uid: currentUser.uid,
+          data: snapshot.data(),
+        });
 
-  const unsub = onSnapshot(
-    doc(db, "userChats", currentUser.uid),
-    (snapshot) => {
-      console.log("🔥 userChats snapshot:", {
-        exists: snapshot.exists(),
-        data: snapshot.data(),
-        uid: currentUser.uid,
-      });
+        setChats(snapshot.data() || {});
+      }
+    );
 
-      setChats(snapshot.data() || {});
-    }
-  );
-
-  return () => unsub();
-}, [currentUser?.uid]);
+    return () => unsub();
+  }, [currentUser?.uid]);
 
   const handleSelect = (userInfo) => {
     if (!userInfo) return;
@@ -43,7 +40,7 @@ const Chats = () => {
     });
   };
 
-  const validChats = Object.entries(chats)
+  const validChats = Object.entries(chats || {})
     .filter(
       ([, chat]) =>
         chat &&
@@ -59,9 +56,7 @@ const Chats = () => {
   return (
     <div className="chats">
       {validChats.length === 0 && (
-        <div className="noChats">
-          No conversations yet
-        </div>
+        <div className="noChats">No conversations yet</div>
       )}
 
       {validChats.map(([chatId, chat]) => (
