@@ -38,17 +38,11 @@ const Chats = () => {
     });
   };
 
-  const validChats = Object.entries(chats)
-    .map(([chatId, chat]) => ({
-      chatId,
-      ...chat,
-    }))
-    .filter((chat) => chat.userInfo?.uid)
-    .sort(
-      (a, b) =>
-        (b.date?.toMillis?.() || 0) -
-        (a.date?.toMillis?.() || 0)
-    );
+  const validChats = Object.entries(chats).sort(
+    (a, b) =>
+      (b[1]?.date?.toMillis?.() || 0) -
+      (a[1]?.date?.toMillis?.() || 0)
+  );
     console.log("Valid chats: ",validChats);
   return (
     <div className="chats">
