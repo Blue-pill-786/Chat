@@ -15,13 +15,11 @@ const Chats = () => {
     const unsub = onSnapshot(
       doc(db, "userChats", currentUser.uid),
       (snapshot) => {
-        console.log("🔥 userChats snapshot:", {
-          exists: snapshot.exists(),
-          uid: currentUser.uid,
-          data: snapshot.data(),
-        });
-
-        setChats(snapshot.data() || {});
+        if (snapshot.exists()) {
+          setChats(snapshot.data());
+        } else {
+          setChats({});
+        }
       }
     );
 
@@ -40,24 +38,21 @@ const Chats = () => {
     });
   };
 
-  const validChats = Object.entries(chats || {})
-    .filter(
-      ([, chat]) =>
-        chat &&
-        chat.userInfo &&
-        chat.userInfo.uid
-    )
+  const sortedChats = Object.entries(chats)
+    .filter(([_, chat]) => chat?.userInfo?.uid)
     .sort(
       (a, b) =>
         (b[1]?.date?.toMillis?.() || 0) -
         (a[1]?.date?.toMillis?.() || 0)
     );
-    console.log("🔥 validChats:", validChats);
+
   return (
     <div className="chats">
-      
+      {sortedChats.length === 0 && (
+        <div className="noChats">No conversations yet</div>
+      )}
 
-      {validChats.map(([chatId, chat]) => (
+      {sortedChats.map(([chatId, chat]) => (
         <div
           className="userChat"
           key={chatId}
