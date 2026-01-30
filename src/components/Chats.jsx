@@ -52,7 +52,7 @@ const Chats = () => {
         (b[1]?.date?.toMillis?.() || 0) -
         (a[1]?.date?.toMillis?.() || 0)
     );
-
+    console.log("🔥 validChats:", validChats);
   return (
     <div className="chats">
       
