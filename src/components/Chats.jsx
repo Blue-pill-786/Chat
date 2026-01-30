@@ -15,31 +15,18 @@ const Chats = () => {
     const unsub = onSnapshot(
       doc(db, "userChats", currentUser.uid),
       (snap) => {
-        setChats(snap.exists() ? snap.data() : {});
+        console.log("🔥 userChats snapshot:", snap.data());
+        setChats(snap.data() || {});
       }
     );
 
     return () => unsub();
   }, [currentUser?.uid]);
 
-  const handleSelect = (userInfo) => {
-    if (!userInfo) return;
+  const chatEntries = Object.entries(chats);
 
-    dispatch({
-      type: "CHANGE_USER",
-      payload: {
-        user: userInfo,
-        currentUid: currentUser.uid,
-      },
-    });
-  };
+  console.log("✅ Chat Entries:", chatEntries);
 
-  const chatEntries = Object.entries(chats).sort(
-    (a, b) =>
-      (b[1]?.date?.toMillis?.() || 0) -
-      (a[1]?.date?.toMillis?.() || 0)
-  );
-  console.log("Chat Entries:", chatEntries);
   return (
     <div className="chats">
       {chatEntries.length === 0 && (
@@ -47,24 +34,28 @@ const Chats = () => {
       )}
 
       {chatEntries.map(([chatId, chat]) => {
-        const userInfo = chat?.userInfo;
-
-        // 🔒 HARD GUARD — prevents crash
-        if (!userInfo?.uid) return null;
+        if (!chat?.userInfo?.uid) return null;
 
         return (
           <div
             className="userChat"
             key={chatId}
-            onClick={() => handleSelect(userInfo)}
+            onClick={() =>
+              dispatch({
+                type: "CHANGE_USER",
+                payload: {
+                  user: chat.userInfo,
+                  currentUid: currentUser.uid,
+                },
+              })
+            }
           >
             <img
-              src={userInfo.photoURL || "/avatar.png"}
-              alt={userInfo.displayName || "User"}
+              src={chat.userInfo.photoURL || "/avatar.png"}
+              alt={chat.userInfo.displayName}
             />
-
             <div className="userChatInfo">
-              <span>{userInfo.displayName || "Unknown"}</span>
+              <span>{chat.userInfo.displayName}</span>
               <p>{chat.lastMessage?.text || "No messages yet"}</p>
             </div>
           </div>
