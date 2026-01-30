@@ -5,9 +5,12 @@ import Input from "./Input";
 import Cam from "../img/cam.png";
 import Add from "../img/add.png";
 import More from "../img/more.png";
+import useOnlineStatus from "../hooks/useOnlineStatus";
+
 
 const Chat = () => {
-  const { data } = useContext(ChatContext);
+    const { data } = useContext(ChatContext);
+    const isOnline = useOnlineStatus();
 
   if (!data.chatId) {
     return (
@@ -22,6 +25,11 @@ const Chat = () => {
   return (
     <div className="chat">
       <div className="chatInfo">
+        {!isOnline && (
+  <span style={{ fontSize: "12px", color: "#ef4444" }}>
+    Offline
+  </span>
+)}
         <span>{data.user?.displayName}</span>
         <div className="chatIcons">
           <img src={Cam} alt="Video call" />

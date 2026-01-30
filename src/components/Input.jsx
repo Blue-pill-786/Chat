@@ -2,6 +2,8 @@ import React, { useContext, useState } from "react";
 import Img from "../img/img.png";
 import { AuthContext } from "../context/AuthContext";
 import { ChatContext } from "../context/ChatContext";
+import useOnlineStatus from "../hooks/useOnlineStatus";
+
 import {
   arrayUnion,
   doc,
@@ -17,6 +19,8 @@ const Input = () => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
   const [sending, setSending] = useState(false);
+  const isOnline = useOnlineStatus();
+
 
   const { currentUser } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
@@ -122,9 +126,13 @@ const Input = () => {
           <img src={Img} alt="Attach" />
         </label>
 
-        <button onClick={handleSend} disabled={!data.chatId || sending}>
-          {sending ? "Sending…" : "Send"}
-        </button>
+        <button
+  onClick={handleSend}
+  disabled={!data.chatId || sending || !isOnline}
+>
+  {!isOnline ? "Offline" : sending ? "Sending…" : "Send"}
+</button>
+
       </div>
     </div>
   );
