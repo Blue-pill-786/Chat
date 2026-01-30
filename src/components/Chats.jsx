@@ -12,15 +12,24 @@ const Chats = () => {
   useEffect(() => {
     if (!currentUser?.uid) return;
 
-    const unsub = onSnapshot(
-      doc(db, "userChats", currentUser.uid),
-      (snapshot) => {
-        setChats(snapshot.data() || {});
-      }
-    );
+    useEffect(() => {
+  if (!currentUser?.uid) return;
 
-    return () => unsub();
-  }, [currentUser?.uid]);
+  const unsub = onSnapshot(
+    doc(db, "userChats", currentUser.uid),
+    (snapshot) => {
+      console.log("🔥 userChats snapshot:", {
+        exists: snapshot.exists(),
+        data: snapshot.data(),
+        uid: currentUser.uid,
+      });
+
+      setChats(snapshot.data() || {});
+    }
+  );
+
+  return () => unsub();
+}, [currentUser?.uid]);
 
   const handleSelect = (userInfo) => {
     if (!userInfo) return;
