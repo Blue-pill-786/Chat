@@ -55,9 +55,7 @@ const Chats = () => {
 
   return (
     <div className="chats">
-      {validChats.length === 0 && (
-        <div className="noChats">No conversations yet</div>
-      )}
+      
 
       {validChats.map(([chatId, chat]) => (
         <div
