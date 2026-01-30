@@ -321,3 +321,105 @@
     transform: scale(1) translateY(0);
   }
 }
+
+/* =========================
+   AUTH (LOGIN / REGISTER)
+========================= */
+
+.authPage {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e9efff, #f5f7ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.authCard {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(180%) blur(18px);
+  border-radius: 22px;
+  padding: 32px 28px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.18);
+  text-align: center;
+}
+
+.authLogo {
+  width: 88px;
+  height: 88px;
+  border-radius: 22px;
+  object-fit: cover;
+  margin-bottom: 16px;
+}
+
+.authTitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.authSubtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.authForm input {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: none;
+  background: #f1f1f4;
+  font-size: 14px;
+}
+
+.authForm input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.25);
+}
+
+.authForm button {
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #0a84ff, #007aff);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.authForm button:active {
+  transform: scale(0.97);
+}
+
+.authError {
+  font-size: 13px;
+  color: #ef4444;
+  margin-top: 4px;
+}
+
+.authFooter {
+  margin-top: 20px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.authFooter a {
+  color: #0a84ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+.authFooter a:hover {
+  text-decoration: underline;
+}
