@@ -38,24 +38,28 @@ const Chats = () => {
     });
   };
 
-  const sortedChats = Object.entries(chats)
-    .filter(([_, chat]) => chat?.userInfo?.uid)
+  const validChats = Object.entries(chats)
+    .map(([chatId, chat]) => ({
+      chatId,
+      ...chat,
+    }))
+    .filter((chat) => chat.userInfo?.uid)
     .sort(
       (a, b) =>
-        (b[1]?.date?.toMillis?.() || 0) -
-        (a[1]?.date?.toMillis?.() || 0)
+        (b.date?.toMillis?.() || 0) -
+        (a.date?.toMillis?.() || 0)
     );
-
+    console.log("Valid chats: ",validChats);
   return (
     <div className="chats">
-      {sortedChats.length === 0 && (
+      {validChats.length === 0 && (
         <div className="noChats">No conversations yet</div>
       )}
 
-      {sortedChats.map(([chatId, chat]) => (
+      {validChats.map((chat) => (
         <div
           className="userChat"
-          key={chatId}
+          key={chat.chatId}
           onClick={() => handleSelect(chat.userInfo)}
         >
           <img
