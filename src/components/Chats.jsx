@@ -34,34 +34,43 @@ const Chats = () => {
     });
   };
 
+  const validChats = Object.entries(chats)
+    .filter(
+      ([, chat]) =>
+        chat &&
+        chat.userInfo &&
+        chat.userInfo.uid
+    )
+    .sort(
+      (a, b) =>
+        (b[1]?.date?.toMillis?.() || 0) -
+        (a[1]?.date?.toMillis?.() || 0)
+    );
+
   return (
     <div className="chats">
-      {Object.entries(chats)
-        .filter(
-          ([_, chat]) =>
-            chat && chat.userInfo && chat.userInfo.uid
-        )
-        .sort(
-          (a, b) =>
-            b[1]?.date?.toMillis?.() -
-            a[1]?.date?.toMillis?.()
-        )
-        .map(([chatId, chat]) => (
-          <div
-            className="userChat"
-            key={chatId}
-            onClick={() => handleSelect(chat.userInfo)}
-          >
-            <img
-              src={chat.userInfo.photoURL || "/avatar.png"}
-              alt={chat.userInfo.displayName}
-            />
-            <div className="userChatInfo">
-              <span>{chat.userInfo.displayName}</span>
-              <p>{chat.lastMessage?.text || ""}</p>
-            </div>
+      {validChats.length === 0 && (
+        <div className="noChats">
+          No conversations yet
+        </div>
+      )}
+
+      {validChats.map(([chatId, chat]) => (
+        <div
+          className="userChat"
+          key={chatId}
+          onClick={() => handleSelect(chat.userInfo)}
+        >
+          <img
+            src={chat.userInfo.photoURL || "/avatar.png"}
+            alt={chat.userInfo.displayName}
+          />
+          <div className="userChatInfo">
+            <span>{chat.userInfo.displayName}</span>
+            <p>{chat.lastMessage?.text || "No messages yet"}</p>
           </div>
-        ))}
+        </div>
+      ))}
     </div>
   );
 };
